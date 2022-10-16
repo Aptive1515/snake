@@ -1,0 +1,89 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: aptive <aptive@student.42.fr>              +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/03/24 23:12:10 by tdelauna          #+#    #+#              #
+#    Updated: 2022/03/26 10:28:36 by aptive           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME	= so_long
+OS		= $(shell uname)
+
+# directories
+SRCDIR	= ./src
+INCDIR	= ./includes
+OBJDIR	= ./obj
+
+# src / obj files
+SRC		= 	main.c \
+			ft_map.c\
+			ft_hook.c\
+
+OBJ		= $(addprefix $(OBJDIR)/,$(SRC:.c=.o))
+
+# compiler
+CC		= gcc
+CFLAGS	= -Wall -Wextra -Werror -g
+
+# mlx library
+ifeq ($(OS), Linux)
+	MLX		= ./miniLibX_X11/
+	MLX_LNK	= -L $(MLX) -l mlx -lXext -lX11
+else
+	MLX		= ./miniLibX/
+	MLX_LNK	= -Lmlx -lmlx -framework OpenGL -framework AppKit
+endif
+
+MLX_INC	= -I $(MLX)
+MLX_LIB	= $(addprefix $(MLX),mlx.a)
+
+FRAME		= -Lmlx -lmlx -framework OpenGL -framework AppKit
+
+# ft library
+FT		= ./libft/
+FT_LIB	= $(addprefix $(FT),libft.a)
+FT_INC	= -I ./libft
+FT_LNK	= -L ./libft -l ft -l pthread
+
+
+# Colors #
+GREEN		=	\e[38;5;118m
+YELLOW		=	\e[38;5;226m
+RESET		=	\e[0m
+_SUCCESS	=	[$(GREEN)SUCCESS$(RESET)]
+_INFO		=	[$(YELLOW)INFO$(RESET)]
+
+all: obj $(FT_LIB)  $(NAME)
+	@printf "$(_SUCCESS) so_long ready.\n"
+
+obj:
+	mkdir -p $(OBJDIR)
+
+$(OBJDIR)/%.o:$(SRCDIR)/%.c
+	$(CC) $(CFLAGS) $(FT_INC) -I $(INCDIR) -o $@ -c $<
+
+
+$(FT_LIB):
+	@make -C $(FT)
+
+$(NAME): $(OBJ)
+	$(CC) $(OBJ) $(MLX_LNK) $(FT_LNK) -lm -o $(NAME)
+
+clean:
+	rm -rf $(OBJDIR)
+	make -C $(MLX) clean
+	@printf "$(_INFO) so_long removed.\n"
+
+
+fclean: clean
+	rm -rf $(NAME)
+	make -C $(FT) fclean
+#	make -C $(MLX) clean
+	@printf "$(_INFO) libft removed.\n"
+#	@printf "$(_INFO) mlx removed.\n"
+
+re: fclean all
