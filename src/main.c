@@ -6,7 +6,7 @@
 /*   By: aptive <aptive@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/25 11:30:42 by tdelauna          #+#    #+#             */
-/*   Updated: 2022/10/16 18:54:05 by aptive           ###   ########.fr       */
+/*   Updated: 2022/10/17 01:30:50 by aptive           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,12 @@ t_data	*ft_init_data(t_data *data)
 	data->map_x_right = data->screen_w - SQUARE;
 
 	data->snake->direction = 'E';
-	data->snake->len_snake = 3;
+	data->snake->len_snake = 2;
+	data->snake->len_snake_new = 2;
 
 	data->snake->position_x = data->map_x_left + SQUARE * 0;
 	data->snake->position_y = data->map_y_up + SQUARE * 0;
+
 
 	data->snake->touch = 1;
 	data->snake->next = NULL;
@@ -53,7 +55,30 @@ void	init_mlx(t_data *data)
 
 int	render_next_frame(t_data *data)
 {
+	ft_all_screen_color(data, BLACK);
+	ft_meet(data);
 	ft_snake(data);
+	if (data->snake->position_x == data->meet_x && data->snake->position_y == data->meet_y)
+	{
+		data->meet = 0;
+		data->snake->len_snake += 1;
+		data->meet_last_x = data->meet_x;
+		data->meet_last_y = data->meet_y;
+	}
+	if (data->snake->len_snake != data->snake->len_snake_new)
+	{
+		ft_go_to_last_maille(data->snake);
+
+		if (data->snake->position_x == data->meet_last_x && data->snake->position_y == data->meet_last_y)
+		{
+
+			meet_past = 1;
+
+		}
+
+	}
+
+	ft_go_to_first_maille(data->snake);
 	usleep(500000);
 	data->snake->touch = 1;
 	return (1);
@@ -82,10 +107,13 @@ int	main(void)
 	// data->map = ft_map(argv[1]);
 	data = ft_init_data(data);
 	init_mlx(data);
+	srand(time(NULL));
 
 	ft_add_snake_list(data->snake);
 	init_maille(data->snake);
 	update_maille(data->snake);
+
+	affiche_snake(data->snake);
 
 	ft_affiche_map(data);
 	// mlx_hook(data->mlx_win, 17, 1L << 0, ft_close, data);
